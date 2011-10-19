@@ -38,7 +38,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * Gets information about an specific node
+ * Gets information about a specific node
  * @author Pablo Pareja Tobes <ppareja@era7.com>
  */
 public class GetNodeServlet extends BasicServlet {
