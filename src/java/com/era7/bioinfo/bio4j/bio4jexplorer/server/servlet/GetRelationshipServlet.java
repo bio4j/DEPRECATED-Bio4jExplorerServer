@@ -1,6 +1,18 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2011  "Bio4j"
+ *
+ * This file is part of Bio4j
+ *
+ * Bio4j is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 package com.era7.bioinfo.bio4j.bio4jexplorer.server.servlet;
 
@@ -14,6 +26,7 @@ import com.era7.bioinfo.bio4j.bio4jexplorer.server.CommonData;
 import com.era7.bioinfo.bio4j.bio4jexplorer.server.RequestList;
 import com.era7.bioinfo.bioinfoaws.util.CredentialsRetriever;
 import com.era7.lib.bioinfoxml.bio4j.Bio4jNodeXML;
+import com.era7.lib.bioinfoxml.bio4j.Bio4jRelationshipIndexXML;
 import com.era7.lib.bioinfoxml.bio4j.Bio4jRelationshipXML;
 import com.era7.lib.communication.model.BasicSession;
 import com.era7.lib.communication.xml.Request;
@@ -25,7 +38,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- *
+ * Gets information about an specific relationship
  * @author Pablo Pareja Tobes <ppareja@era7.com>
  */
 public class GetRelationshipServlet extends BasicServlet {
@@ -50,6 +63,7 @@ public class GetRelationshipServlet extends BasicServlet {
             SelectResult selectResult = simpleDBClient.select(selectRequest);
 
             if (selectResult.getItems().size() > 0) {
+                
                 Item item = selectResult.getItems().get(0);
                 Bio4jRelationshipXML rel = new Bio4jRelationshipXML();
                 rel.setRelationshipName(item.getName());
@@ -74,10 +88,45 @@ public class GetRelationshipServlet extends BasicServlet {
                             node.setNodeName(attribute.getValue());
                             rel.addEndNode(node);
                         }
+                        
+                    }else if(attribute.getName().equals(CommonData.JAVADOC_URL_ATTRIBUTE)){
+                        
+                        rel.setJavadocUrl(attribute.getValue());
+                        
                     }
                 }
+                
+                
+                //-------------GETTING NODE INDEXES--------------
+
+                String indexesSelectExpression = "SELECT * from bio4j where ITEM_TYPE = 'relationship_index' AND RELATIONSHIP_NAME = '" + relName + "'";
+                selectRequest.setSelectExpression(indexesSelectExpression);
+                selectResult = simpleDBClient.select(selectRequest);
+
+                if (selectResult.getItems().size() > 0) {
+
+                    for (Item indexItem : selectResult.getItems()) {
+                        Bio4jRelationshipIndexXML relIndex = new Bio4jRelationshipIndexXML();
+                        relIndex.setIndexName(indexItem.getName());
+
+                        atts = indexItem.getAttributes();
+
+                        for (Attribute attribute : atts) {
+
+                            if (attribute.getName().equals(CommonData.RELATIONSHIP_NAME_ATTRIBUTE)) {
+                                relIndex.setRelationshipName(attribute.getValue());
+                            }
+                        }
+
+                        rel.addIndex(relIndex);
+                    }
+
+                }                
+                
                 response.addChild(rel);
+                
                 response.setStatus(Response.SUCCESSFUL_RESPONSE);
+                
             } else {
                 response.setError("There is no such relationship...");
             }

@@ -17,4 +17,6 @@ public class RequestList {
     public static final String GET_RELATIONSHIPS_REQUEST = "get_relationships";
     public static final String GET_RELATIONSHIP_REQUEST = "get_relationship";
     
+    public static final String GET_EVERYTHING_REQUEST = "get_everything";
+    
 }
