@@ -26,6 +26,7 @@ import com.era7.bioinfo.bio4j.bio4jexplorer.server.CommonData;
 import com.era7.bioinfo.bio4j.bio4jexplorer.server.RequestList;
 import com.era7.bioinfo.bioinfoaws.util.CredentialsRetriever;
 import com.era7.lib.bioinfoxml.bio4j.Bio4jNodeXML;
+import com.era7.lib.bioinfoxml.bio4j.Bio4jPropertyXML;
 import com.era7.lib.bioinfoxml.bio4j.Bio4jRelationshipIndexXML;
 import com.era7.lib.bioinfoxml.bio4j.Bio4jRelationshipXML;
 import com.era7.lib.communication.model.BasicSession;
@@ -93,11 +94,23 @@ public class GetRelationshipServlet extends BasicServlet {
                         
                         rel.setJavadocUrl(attribute.getValue());
                         
+                    }else if(attribute.getName().equals(CommonData.NAME_PROPERTY_ATTRIBUTE)){
+                        
+                        rel.setNameProperty(attribute.getValue());
+                        
+                    }else if(attribute.getName().equals(CommonData.DATA_SOURCE_ATTRIBUTE)){
+                        
+                        rel.setDataSource(attribute.getValue());
+                        
+                    }else if(attribute.getName().equals(CommonData.DATA_SOURCE_ATTRIBUTE)){
+                        
+                        rel.setDataSource(attribute.getValue());
+                        
                     }
                 }
                 
                 
-                //-------------GETTING NODE INDEXES--------------
+                //-------------GETTING RELATIONSHIP INDEXES--------------
 
                 String indexesSelectExpression = "SELECT * from bio4j where ITEM_TYPE = 'relationship_index' AND RELATIONSHIP_NAME = '" + relName + "'";
                 selectRequest.setSelectExpression(indexesSelectExpression);
@@ -121,7 +134,34 @@ public class GetRelationshipServlet extends BasicServlet {
                         rel.addIndex(relIndex);
                     }
 
-                }                
+                }       
+                
+                //-------------GETTING RELATIONSHIP PROPERTIES--------------
+
+                String propertiesSelectExpression = "SELECT * from bio4j where ITEM_TYPE = 'relationship_property' AND RELATIONSHIP_NAME = '" + relName + "'";
+                selectRequest.setSelectExpression(propertiesSelectExpression);
+                selectResult = simpleDBClient.select(selectRequest);
+
+                if (selectResult.getItems().size() > 0) {
+
+                    for (Item propertyItem : selectResult.getItems()) {
+                        
+                        Bio4jPropertyXML property = new Bio4jPropertyXML();
+
+                        atts = propertyItem.getAttributes();
+
+                        for (Attribute attribute : atts) {
+
+                            if (attribute.getName().equals(CommonData.PROPERTY_NAME_ATTRIBUTE)) {
+                                property.setPropertyName(attribute.getValue());
+                            } else if (attribute.getName().equals(CommonData.PROPERTY_TYPE_ATTRIBUTE)) {
+                                property.setType(attribute.getValue());
+                            } 
+                        }
+
+                        rel.addProperty(property);
+                    }
+                }
                 
                 response.addChild(rel);
                 
@@ -130,8 +170,6 @@ public class GetRelationshipServlet extends BasicServlet {
             } else {
                 response.setError("There is no such relationship...");
             }
-
-
 
 
         } else {

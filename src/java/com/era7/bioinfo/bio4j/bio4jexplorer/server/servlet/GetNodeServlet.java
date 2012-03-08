@@ -27,6 +27,7 @@ import com.era7.bioinfo.bio4j.bio4jexplorer.server.RequestList;
 import com.era7.bioinfo.bioinfoaws.util.CredentialsRetriever;
 import com.era7.lib.bioinfoxml.bio4j.Bio4jNodeIndexXML;
 import com.era7.lib.bioinfoxml.bio4j.Bio4jNodeXML;
+import com.era7.lib.bioinfoxml.bio4j.Bio4jPropertyXML;
 import com.era7.lib.bioinfoxml.bio4j.Bio4jRelationshipXML;
 import com.era7.lib.communication.model.BasicSession;
 import com.era7.lib.communication.xml.Request;
@@ -96,6 +97,10 @@ public class GetNodeServlet extends BasicServlet {
 
                         node.setJavadocUrl(attribute.getValue());
 
+                    } else if (attribute.getName().equals(CommonData.DATA_SOURCE_ATTRIBUTE)) {
+
+                        node.setDataSource(attribute.getValue());
+
                     }
                 }
 
@@ -126,7 +131,39 @@ public class GetNodeServlet extends BasicServlet {
 
                         node.addIndex(nodeIndex);
                     }
+                }
+                
+                //-------------GETTING NODE PROPERTIES--------------
 
+                String proertiesSelectExpression = "SELECT * from bio4j where ITEM_TYPE = 'node_property' AND NODE_NAME = '" + nodeName + "'";
+                selectRequest.setSelectExpression(proertiesSelectExpression);
+                selectResult = simpleDBClient.select(selectRequest);
+
+                if (selectResult.getItems().size() > 0) {
+
+                    for (Item propertyItem : selectResult.getItems()) {
+                        
+                        Bio4jPropertyXML property = new Bio4jPropertyXML();
+
+                        atts = propertyItem.getAttributes();
+
+                        for (Attribute attribute : atts) {
+
+                            if (attribute.getName().equals(CommonData.PROPERTY_NAME_ATTRIBUTE)) {
+                                property.setPropertyName(attribute.getValue());
+                            } else if (attribute.getName().equals(CommonData.INDEXED_ATTRIBUTE)) {
+                                property.setIndexed(attribute.getValue());
+                            } else if (attribute.getName().equals(CommonData.INDEX_TYPE_ATTRIBUTE)) {
+                                property.setIndexType(attribute.getValue());
+                            } else if (attribute.getName().equals(CommonData.INDEX_NAME_ATTRIBUTE)) {
+                                property.setIndexName(attribute.getValue());
+                            } else if (attribute.getName().equals(CommonData.PROPERTY_TYPE_ATTRIBUTE)) {
+                                property.setType(attribute.getValue());
+                            }
+                        }
+
+                        node.addProperty(property);
+                    }
                 }
 
                 response.addChild(node);

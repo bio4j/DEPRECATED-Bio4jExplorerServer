@@ -23,5 +23,11 @@ public class CommonData {
     public static final String INDEX_NAME_ATTRIBUTE = "INDEX_NAME";
     public static final String PROPERTY_INDEXED_ATTRIBUTE = "PROPERTY_INDEXED";
     public static final String INDEX_TYPE_ATTRIBUTE = "INDEX_TYPE";
+    public static final String NAME_PROPERTY_ATTRIBUTE = "NAME_PROPERTY";
+    public static final String DATA_SOURCE_ATTRIBUTE = "DATA_SOURCE";
+    
+    public static final String PROPERTY_NAME_ATTRIBUTE = "PROPERTY_NAME";
+    public static final String PROPERTY_TYPE_ATTRIBUTE = "PROPERTY_TYPE";
+    public static final String INDEXED_ATTRIBUTE = "INDEXED";
     
 }
